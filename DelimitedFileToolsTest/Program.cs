@@ -8,6 +8,8 @@ namespace DelimitedFileToolsTest
     {
         static void Main(string[] args)
         {
+            Console.WriteLine("The given DAT file has {0} rows.", DelimitedFile.GetRowCount(args[0]));
+
             // initialize the reader, given the file to read from and that this file a header row
             DelimitedFile file = new DelimitedFile(args[0], true);
 

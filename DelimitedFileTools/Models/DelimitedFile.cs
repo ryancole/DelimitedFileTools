@@ -15,6 +15,7 @@ namespace DelimitedFileTools.Models
         private int m_columnDelimiterCharacter;
         private string m_path;
         private bool m_hasHeaders;
+        private bool m_countOnly;
         private StreamReader m_stream;
         private DelimitedFileRow m_headerRow;
         private DelimitedFileRow m_currentRow;
@@ -26,15 +27,27 @@ namespace DelimitedFileTools.Models
             m_stream.Close();
         }
 
-        public DelimitedFile(string p_path, bool p_hasHeaders = true)
+        public DelimitedFile(string p_path, bool p_hasHeaders = true, bool p_countOnly = false)
         {
+            // save file path
             m_path = p_path;
+
+            // keep track of which row the reader is on
             m_currentRowNumber = 0;
+
+            // default special characters
             m_newlineCharacter = 10;
             m_textQualifierCharacter = 254;
             m_carriageReturnCharacter = 13;
             m_columnDelimiterCharacter = 20;
+
+            // whether or not this delimited file has a header row
             m_hasHeaders = p_hasHeaders;
+
+            // whether or not this instance is only to retrieve a row count
+            m_countOnly = p_countOnly;
+
+            // initialize the read file stream
             m_stream = new StreamReader(p_path, true);
         }
 
@@ -43,7 +56,7 @@ namespace DelimitedFileTools.Models
             if (!m_stream.EndOfStream)
             {
                 // read in the row data
-                m_currentRow = new DelimitedFileRow(m_stream, m_newlineCharacter, m_carriageReturnCharacter, m_textQualifierCharacter, m_columnDelimiterCharacter);
+                m_currentRow = new DelimitedFileRow(m_stream, m_newlineCharacter, m_carriageReturnCharacter, m_textQualifierCharacter, m_columnDelimiterCharacter, m_countOnly);
 
                 // increase the row number
                 m_currentRow.RowNumber = ++m_currentRowNumber;
@@ -79,6 +92,28 @@ namespace DelimitedFileTools.Models
             }
 
             return "";
+        }
+
+        #endregion
+
+        #region Static Functions
+
+        public static int GetRowCount(string p_path, bool p_hasHeaders = true)
+        {
+            int rowCount = 0;
+            DelimitedFile file = new DelimitedFile(p_path, p_hasHeaders, true);
+
+            while (file.ReadRow())
+            {
+                rowCount++;
+
+                if (p_hasHeaders == true && file.CurrentRowNumber == 1)
+                {
+                    rowCount--;
+                }
+            }
+
+            return rowCount;
         }
 
         #endregion

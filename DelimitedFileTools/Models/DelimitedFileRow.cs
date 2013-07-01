@@ -17,7 +17,7 @@ namespace DelimitedFileTools.Models
 
         #region Methods
 
-        public DelimitedFileRow(StreamReader p_reader, int p_newline, int p_carriage, int p_textqualifier, int p_columndelimiter)
+        public DelimitedFileRow(StreamReader p_reader, int p_newline, int p_carriage, int p_textqualifier, int p_columndelimiter, bool p_countOnly = false)
         {
             int nextCharacter = -1;
             int currentCharacter = -1;
@@ -91,7 +91,10 @@ namespace DelimitedFileTools.Models
                 }
                 else
                 {
-                    columnPayload += Convert.ToChar(currentCharacter);
+                    if (p_countOnly == false)
+                    {
+                        columnPayload += Convert.ToChar(currentCharacter);
+                    }
                 }
             }
             while (nextCharacter != -1);
