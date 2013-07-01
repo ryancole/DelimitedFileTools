@@ -57,10 +57,18 @@ namespace DelimitedFileTools.Models
                         isInsideTextQualifiers = true;
                         continue;
                     }
-                    else if (isInsideTextQualifiers == true && (nextCharacter == m_columnDelimiter || nextCharacter == m_carriage || nextCharacter == m_newline))
+                    else if (isInsideTextQualifiers == true && (nextCharacter == m_columnDelimiter || nextCharacter == m_carriage || nextCharacter == m_newline || nextCharacter == -1))
                     {
-                        isInsideTextQualifiers = false;
-                        continue;
+                        if (nextCharacter == -1)
+                        {
+                            m_columns.Add(columnPayload);
+                            break;
+                        }
+                        else
+                        {
+                            isInsideTextQualifiers = false;
+                            continue;
+                        }
                     }
                 }
                 else if (currentCharacter == p_columndelimiter && isInsideTextQualifiers == false)
