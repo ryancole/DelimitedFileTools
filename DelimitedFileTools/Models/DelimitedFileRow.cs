@@ -19,7 +19,10 @@ namespace DelimitedFileTools.Models
 
         public DelimitedFileRow(StreamReader p_reader, int p_newline, int p_carriage, int p_textqualifier, int p_columndelimiter)
         {
-            int currentCharacter;
+            int nextCharacter = -1;
+            int currentCharacter = -1;
+            int previousCharacter = -1;
+
             bool isInsideTextQualifiers = false;
 
             m_newline = p_newline;
@@ -33,12 +36,32 @@ namespace DelimitedFileTools.Models
             // initialize the container for the column payload
             string columnPayload = "";
 
-            while ((currentCharacter = p_reader.Read()) != -1)
+            do
             {
+                // adjust the characters so we can see previous and next character
+                previousCharacter = currentCharacter;
+                currentCharacter = nextCharacter;
+                nextCharacter = p_reader.Read();
+
+                // continue hoping that we get data
+                if (currentCharacter == -1)
+                {
+                    continue;
+                }
+
                 if (currentCharacter == p_textqualifier)
                 {
-                    isInsideTextQualifiers = !isInsideTextQualifiers;
-                    continue;
+                    // be explicit about the text qualifier state changes instead of just a toggle
+                    if (isInsideTextQualifiers == false && (previousCharacter == -1 || previousCharacter == m_columnDelimiter))
+                    {
+                        isInsideTextQualifiers = true;
+                        continue;
+                    }
+                    else if (isInsideTextQualifiers == true && (nextCharacter == m_columnDelimiter || nextCharacter == m_carriage || nextCharacter == m_newline))
+                    {
+                        isInsideTextQualifiers = false;
+                        continue;
+                    }
                 }
                 else if (currentCharacter == p_columndelimiter && isInsideTextQualifiers == false)
                 {
@@ -53,7 +76,7 @@ namespace DelimitedFileTools.Models
                 }
                 else if ((currentCharacter == p_carriage || currentCharacter == p_newline) && isInsideTextQualifiers == false)
                 {
-                    if (currentCharacter == p_newline)
+                    if (currentCharacter == p_newline || (currentCharacter == p_carriage && nextCharacter == p_newline))
                     {
                         // add the column payload to the collection
                         m_columns.Add(columnPayload);
@@ -71,6 +94,7 @@ namespace DelimitedFileTools.Models
                     columnPayload += Convert.ToChar(currentCharacter);
                 }
             }
+            while (nextCharacter != -1);
         }
 
         public override string ToString()
