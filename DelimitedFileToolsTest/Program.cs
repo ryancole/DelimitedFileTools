@@ -8,10 +8,14 @@ namespace DelimitedFileToolsTest
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("The given DAT file has {0} rows.", DelimitedFile.GetRowCount(args[0]));
+            string sourcepath = args[0];
+
+            // there are a few static utility functions
+            Console.WriteLine("The given DAT file has {0} rows.", DelimitedFile.GetRowCount(sourcepath));
+            Console.WriteLine("The first row: {0}", DelimitedFile.GetFirstRow(sourcepath));
 
             // initialize the reader, given the file to read from and that this file a header row
-            DelimitedFile file = new DelimitedFile(args[0], true);
+            DelimitedFile file = new DelimitedFile(sourcepath, true);
 
             // set delimiter values (these are the defaults)
             file.NewlineCharacter = 10;
@@ -22,13 +26,18 @@ namespace DelimitedFileToolsTest
             // read in and handle an available line from the file
             while (file.ReadRow())
             {
-                // don't print out the header row
                 if (file.CurrentRowNumber == 1)
                 {
+                    Console.WriteLine("Column headers: {0}", string.Join(", ", file.CurrentRow.Columns));
                     continue;
                 }
-
-                Console.WriteLine(file.CurrentRow);
+                else
+                {
+                    if (file.SetColumnValue("text", "example"))
+                    {
+                        Console.WriteLine(file.GetColumnValue("text"));
+                    }
+                }
             }
         }
     }

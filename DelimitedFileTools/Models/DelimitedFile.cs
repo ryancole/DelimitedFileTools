@@ -73,7 +73,7 @@ namespace DelimitedFileTools.Models
             return false;
         }
 
-        public string GetColumn(string p_name)
+        public int GetColumnIndex(string p_name)
         {
             int columnIndex = -1;
 
@@ -86,6 +86,13 @@ namespace DelimitedFileTools.Models
                 }
             }
 
+            return columnIndex;
+        }
+
+        public string GetColumnValue(string p_name)
+        {
+            int columnIndex = GetColumnIndex(p_name);
+
             if (columnIndex >= 0 && columnIndex < ColumnNames.Count)
             {
                 return m_currentRow.Columns[columnIndex];
@@ -94,9 +101,34 @@ namespace DelimitedFileTools.Models
             return "";
         }
 
+        public bool SetColumnValue(string p_name, string p_value)
+        {
+            int columnIndex = GetColumnIndex(p_name);
+
+            if (columnIndex >= 0 && columnIndex < ColumnNames.Count)
+            {
+                m_currentRow.Columns[columnIndex] = p_value;
+                return true;
+            }
+
+            return false;
+        }
+
         #endregion
 
         #region Static Functions
+
+        public static DelimitedFileRow GetFirstRow(string p_path)
+        {
+            DelimitedFile file = new DelimitedFile(p_path);
+
+            if (file.ReadRow())
+            {
+                return file.CurrentRow;
+            }
+
+            return null;
+        }
 
         public static int GetRowCount(string p_path, bool p_hasHeaders = true)
         {
