@@ -27,6 +27,7 @@ namespace DelimitedFileToolsTest
                 }
 
                 Console.WriteLine(file.CurrentRow);
+                Console.WriteLine(file.CurrentRow.RawRow);
             }
         }
     }

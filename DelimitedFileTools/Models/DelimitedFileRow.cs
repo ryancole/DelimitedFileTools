@@ -1,12 +1,17 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using System.Linq;
 using System.Collections.Generic;
 
 namespace DelimitedFileTools.Models
 {
     public class DelimitedFileRow
     {
+        private int m_newline;
+        private int m_carriage;
+        private int m_textQualifier;
+        private int m_columnDelimiter;
         private int m_rowNumber;
         private List<string> m_columns;
 
@@ -17,13 +22,18 @@ namespace DelimitedFileTools.Models
             int currentCharacter;
             bool isInsideTextQualifiers = false;
 
+            m_newline = p_newline;
+            m_carriage = p_carriage;
+            m_textQualifier = p_textqualifier;
+            m_columnDelimiter = p_columndelimiter;
+
             // initialize the column containers
             m_columns = new List<string>();
 
             // initialize the container for the column payload
             string columnPayload = "";
 
-            while ((currentCharacter = p_reader.Read()) != null)
+            while ((currentCharacter = p_reader.Read()) != -1)
             {
                 if (currentCharacter == p_textqualifier)
                 {
@@ -90,6 +100,24 @@ namespace DelimitedFileTools.Models
             get
             {
                 return m_columns;
+            }
+        }
+
+        public List<string> RawColumns
+        {
+            get
+            {
+                char textQualifier = Convert.ToChar(m_textQualifier);
+                return new List<string>(m_columns.Select(x => string.Format("{0}{1}{0}", textQualifier, x)));
+            }
+        }
+
+        public string RawRow
+        {
+            get
+            {
+                char columnDelimiter = Convert.ToChar(m_columnDelimiter);
+                return string.Join(Convert.ToString(columnDelimiter), RawColumns);
             }
         }
 
