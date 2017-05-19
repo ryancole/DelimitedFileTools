@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Text;
-using System.Linq;
+﻿using System.IO;
 using System.Collections.Generic;
 
 namespace DelimitedFileTools.Models
@@ -19,13 +16,6 @@ namespace DelimitedFileTools.Models
         private StreamReader m_stream;
         private DelimitedFileRow m_headerRow;
         private DelimitedFileRow m_currentRow;
-
-        #region Methods
-
-        ~DelimitedFile()
-        {
-            m_stream.Close();
-        }
 
         public DelimitedFile(string p_path, bool p_hasHeaders = true, bool p_countOnly = false)
         {
@@ -51,6 +41,13 @@ namespace DelimitedFileTools.Models
             m_stream = new StreamReader(p_path, true);
         }
 
+        #region Methods
+
+        ~DelimitedFile()
+        {
+            m_stream.Close();
+        }
+
         public bool ReadRow()
         {
             if (!m_stream.EndOfStream)
@@ -71,6 +68,14 @@ namespace DelimitedFileTools.Models
             }
 
             return false;
+        }
+
+        public IEnumerable<DelimitedFileRow> ReadAllRows()
+        {
+            while (ReadRow())
+            {
+                yield return CurrentRow;
+            }
         }
 
         public int GetColumnIndex(string p_name)
@@ -128,6 +133,16 @@ namespace DelimitedFileTools.Models
             }
 
             return null;
+        }
+
+        public static IEnumerable<DelimitedFileRow> GetAllRows(string path)
+        {
+            var file = new DelimitedFile(path);
+
+            while (file.ReadRow())
+            {
+                yield return file.CurrentRow;
+            }
         }
 
         public static int GetRowCount(string p_path, bool p_hasHeaders = true)
