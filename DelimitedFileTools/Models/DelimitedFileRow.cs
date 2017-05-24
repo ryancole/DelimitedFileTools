@@ -51,13 +51,19 @@ namespace DelimitedFileTools.Models
 
                 if (currentCharacter == p_textqualifier)
                 {
-                    // be explicit about the text qualifier state changes instead of just a toggle
+                    // we're currently looking at a text qualifier value. if we are not currently inside of a text qualifier value, we
+                    // may need to toggle to a text quailifier state. text qualifiers should be the start of the column value. we can
+                    // verify start of column value by look at previous character, and seeing if its a new row, or a column delimiter.
                     if (isInsideTextQualifiers == false && (previousCharacter == -1 || previousCharacter == m_columnDelimiter))
                     {
                         isInsideTextQualifiers = true;
                         continue;
                     }
-                    else if (isInsideTextQualifiers == true && (nextCharacter == m_columnDelimiter || nextCharacter == m_carriage || nextCharacter == m_newline || nextCharacter == -1))
+
+                    // we're currently looking at a text qualifier value. if we are already inside of a text qualifier column, we may need
+                    // to exit the text qualifier state. column values may also contain text qualifier characters inside of the actual
+                    // column value, so we need to confirm that we're able to exit the text qualifier column by inspecting the next value.
+                    else if (isInsideTextQualifiers == true && (nextCharacter == m_carriage || nextCharacter == m_newline || nextCharacter == -1))
                     {
                         if (nextCharacter == -1)
                         {
@@ -69,6 +75,14 @@ namespace DelimitedFileTools.Models
                             isInsideTextQualifiers = false;
                             continue;
                         }
+                    }
+
+                    // if we're looking at a text qualifier value, but we're also inside of a text qualifier column, and it does not appear
+                    // that the column is ready to close, we may be looking at an actual content of the column itself, so lets add the char
+                    // to the payload.
+                    else if (isInsideTextQualifiers == true && p_countOnly == false)
+                    {
+                        columnPayload += Convert.ToChar(currentCharacter);
                     }
                 }
                 else if (currentCharacter == p_columndelimiter && isInsideTextQualifiers == false)

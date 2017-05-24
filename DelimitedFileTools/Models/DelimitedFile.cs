@@ -123,9 +123,13 @@ namespace DelimitedFileTools.Models
 
         #region Static Functions
 
-        public static DelimitedFileRow GetFirstRow(string p_path)
+        public static DelimitedFileRow GetFirstRow(string path, char column = ',', char text = '"')
         {
-            DelimitedFile file = new DelimitedFile(p_path);
+            DelimitedFile file = new DelimitedFile(path)
+            {
+                TextQualifierCharacter = text,
+                ColumnDelimiterCharacter = column
+            };
 
             if (file.ReadRow())
             {
@@ -135,9 +139,13 @@ namespace DelimitedFileTools.Models
             return null;
         }
 
-        public static IEnumerable<DelimitedFileRow> GetAllRows(string path)
+        public static IEnumerable<DelimitedFileRow> GetAllRows(string path, char column = ',', char text = '"')
         {
-            var file = new DelimitedFile(path);
+            var file = new DelimitedFile(path)
+            {
+                TextQualifierCharacter = text,
+                ColumnDelimiterCharacter = column
+            };
 
             while (file.ReadRow())
             {
@@ -145,16 +153,20 @@ namespace DelimitedFileTools.Models
             }
         }
 
-        public static int GetRowCount(string p_path, bool p_hasHeaders = true)
+        public static int GetRowCount(string path, bool headers = true, char column = ',', char text = '"')
         {
             int rowCount = 0;
-            DelimitedFile file = new DelimitedFile(p_path, p_hasHeaders, true);
+            var file = new DelimitedFile(path, headers, true)
+            {
+                TextQualifierCharacter = text,
+                ColumnDelimiterCharacter = column
+            };
 
             while (file.ReadRow())
             {
                 rowCount++;
 
-                if (p_hasHeaders == true && file.CurrentRowNumber == 1)
+                if (headers == true && file.CurrentRowNumber == 1)
                 {
                     rowCount--;
                 }
