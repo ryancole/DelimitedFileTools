@@ -60,21 +60,21 @@ namespace DelimitedFileTools.Models
                         continue;
                     }
 
+                    // we're currently looking at a text qualifier, while being inside a text qualified column, and the next character
+                    // appears to be the end of the file. so, lets add this column value.
+                    else if (isInsideTextQualifiers == true && nextCharacter == -1)
+                    {
+                        m_columns.Add(columnPayload);
+                        break;
+                    }
+
                     // we're currently looking at a text qualifier value. if we are already inside of a text qualifier column, we may need
                     // to exit the text qualifier state. column values may also contain text qualifier characters inside of the actual
                     // column value, so we need to confirm that we're able to exit the text qualifier column by inspecting the next value.
-                    else if (isInsideTextQualifiers == true && (nextCharacter == m_carriage || nextCharacter == m_newline || nextCharacter == -1))
+                    else if (isInsideTextQualifiers == true && (nextCharacter == m_columnDelimiter || nextCharacter == m_carriage || nextCharacter == m_newline))
                     {
-                        if (nextCharacter == -1)
-                        {
-                            m_columns.Add(columnPayload);
-                            break;
-                        }
-                        else
-                        {
-                            isInsideTextQualifiers = false;
-                            continue;
-                        }
+                        isInsideTextQualifiers = false;
+                        continue;
                     }
 
                     // if we're looking at a text qualifier value, but we're also inside of a text qualifier column, and it does not appear
