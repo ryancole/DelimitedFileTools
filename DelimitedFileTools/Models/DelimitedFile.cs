@@ -1,4 +1,6 @@
 ﻿using System.IO;
+using System.Data;
+using System.Linq;
 using System.Collections.Generic;
 
 namespace DelimitedFileTools.Models
@@ -10,10 +12,14 @@ namespace DelimitedFileTools.Models
         private int m_textQualifierCharacter;
         private int m_carriageReturnCharacter;
         private int m_columnDelimiterCharacter;
-        private string m_path;
+
         private bool m_hasHeaders;
         private bool m_countOnly;
+
+        private string m_path;
+
         private StreamReader m_stream;
+
         private DelimitedFileRow m_headerRow;
         private DelimitedFileRow m_currentRow;
 
@@ -164,15 +170,36 @@ namespace DelimitedFileTools.Models
 
             while (file.ReadRow())
             {
-                rowCount++;
-
                 if (headers == true && file.CurrentRowNumber == 1)
                 {
-                    rowCount--;
+                    continue;
                 }
+
+                rowCount++;
             }
 
             return rowCount;
+        }
+
+        public static DataTable GetAsDataTable(string path, char column = ',', char text = '"')
+        {
+            var table = new DataTable();
+
+            foreach (var row in GetAllRows(path, column, text))
+            {
+                if (row.RowNumber == 1)
+                {
+                    var columns = row.Columns.Select(m => new DataColumn(m));
+
+                    table.Columns.AddRange(columns.ToArray());
+                }
+                else
+                {
+                    table.Rows.Add(row.Columns);
+                }
+            }
+
+            return table;
         }
 
         #endregion
